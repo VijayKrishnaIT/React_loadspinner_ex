@@ -1,25 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { trackPromise } from "react-promise-tracker";
+import { userAPI } from "./api/userAPI";
+import { postAPI } from "./api/postAPI";
+import { UserTable, PostTable, LoadButton } from "./components";
+import "./App.css";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export class App extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      users: [],
+      posts: [],
+    };
+
+    this.onLoadTables = this.onLoadTables.bind(this);
+  }
+
+  onLoadTables() {
+    this.setState({
+      users: [],
+      posts: [],
+    });
+
+    trackPromise(
+      userAPI.fetchUsers().then((users) => {
+        this.setState({
+          users,
+        });
+      })
+    );
+
+    trackPromise(
+      postAPI.fetchPosts().then((posts) => {
+        this.setState({
+          posts,
+        });
+      })
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <LoadButton onLoad={this.onLoadTables} title="Load tables with delay" />
+        <div className="tables">
+          <UserTable users={this.state.users} />
+          <PostTable posts={this.state.posts} />
+        </div>
+      </div>
+    );
+  }
 }
-
-export default App;
